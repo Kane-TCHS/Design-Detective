@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Detective</title>
+<style>
+:root{
+  --ink:#1d2a26; --muted:#5b6b66; --line:#d5dedb; --bg:#f4f7f6; --card:#ffffff;
+  --brand:#0c4a3e; --brand-2:#13705d; --accent:#e4572e; --warn-bg:#fff4e5; --warn:#8a4b00;
+  --ok:#1b7f4c; --marker:#e4572e; --focal:#7b2cbf;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header.top{background:var(--brand);color:#fff;padding:28px 16px 24px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top .wrap{padding:0}
+header.top h1{margin:0 0 4px;font-size:2rem;letter-spacing:.5px}
+header.top p{margin:0;opacity:.9}
+main{padding:20px 0 60px}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin:0 0 20px}
+h2{color:var(--brand);margin:0 0 8px;font-size:1.35rem}
+h3{margin:0 0 4px;font-size:1.15rem}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+label.f{display:block;font-weight:600;margin:0 0 4px}
+input[type=text],select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid #b9c7c2;border-radius:6px;background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-2);outline-offset:1px}
+.notice{background:var(--warn-bg);color:var(--warn);border-left:4px solid #f0a33a;padding:10px 14px;border-radius:6px;margin:12px 0 0}
+ol.steps{margin:8px 0 0 0;padding-left:22px}
+ol.steps li{margin:4px 0}
+details.ref{margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:#fafcfb}
+details.ref summary{cursor:pointer;font-weight:700;color:var(--brand)}
+dl.terms{display:grid;grid-template-columns:200px 1fr;gap:6px 14px;margin:10px 0 0}
+dl.terms dt{font-weight:700}
+dl.terms dd{margin:0}
+@media (max-width:600px){dl.terms{grid-template-columns:1fr}}
+.termhead{grid-column:1/-1;margin-top:8px;font-weight:800;text-transform:uppercase;font-size:.8rem;letter-spacing:1px;color:var(--muted)}
+.bld-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.num{display:inline-block;background:var(--brand);color:#fff;border-radius:6px;padding:0 8px;margin-right:6px;font-size:.95rem}
+.hint{margin:10px 0 6px;font-weight:600;color:var(--brand-2)}
+.photo-wrap{text-align:center;background:#eef2f1;border-radius:8px;padding:6px}
+.photo{position:relative;display:inline-block;max-width:100%;vertical-align:top;cursor:crosshair;user-select:none;line-height:0}
+.photo img{display:block;max-width:100%;max-height:560px;width:auto;height:auto;border-radius:4px}
+.photo.noclick{cursor:default}
+.mk{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--marker);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5);pointer-events:none;font-size:.95rem;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mk.focal{background:var(--focal);width:36px;height:36px;margin:-18px 0 0 -18px}
+.mk.active{outline:3px dashed #ffd23f;outline-offset:3px}
+.imgerr{line-height:1.5;padding:40px 16px;text-align:center;color:var(--warn);font-weight:600}
+.credit{font-size:.75rem;color:var(--muted);margin-top:4px}
+.credit a{color:var(--muted)}
+.rows{margin-top:12px;display:grid;gap:12px}
+.row{display:grid;grid-template-columns:44px 230px 1fr;gap:10px;align-items:start;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:700px){.row{grid-template-columns:44px 1fr}.row .why{grid-column:1/-1}}
+.badge{width:34px;height:34px;border-radius:50%;background:var(--marker);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.badge.focal{background:var(--focal)}
+.status{font-size:.82rem;margin-top:6px}
+.status.unplaced{color:var(--warn)}
+.status.placed{color:var(--ok)}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--brand);background:#fff;color:var(--brand);padding:4px 10px;font-size:.85rem}
+button:hover{background:#eaf3f0}
+button.primary{background:var(--brand);color:#fff;padding:12px 22px;font-size:1.05rem;font-weight:700}
+button.primary:hover{background:var(--brand-2)}
+button.ghost{border-color:#b9c7c2;color:var(--muted)}
+.cmp-imgs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 14px}
+.cmp-imgs figure{margin:0}
+.cmp-imgs img{width:100%;height:240px;object-fit:cover;border-radius:8px;display:block;background:#dfe7e4}
+.cmp-imgs figcaption{font-weight:700;margin-top:4px}
+.q{margin:14px 0}
+.checklist{list-style:none;padding:0;margin:10px 0 0}
+.checklist li{padding:3px 0}
+.checklist li.done::before{content:"✔ ";color:var(--ok);font-weight:800}
+.checklist li.todo::before{content:"○ ";color:var(--warn);font-weight:800}
+table.rub{width:100%;border-collapse:collapse;margin-top:8px}
+table.rub td,table.rub th{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+table.rub th{background:#eef4f2}
+table.rub td.pts{width:70px;text-align:center;font-weight:700}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:8px;font-size:.92rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.pv{display:none;white-space:pre-wrap}
+.printonly{display:none}
+footer{color:var(--muted);font-size:.8rem;text-align:center;padding:10px 0 30px}
+
+@media print{
+  @page{margin:.5in}
+  body{background:#fff;font-size:11pt}
+  header.top{background:#fff;color:#000;padding:0 0 6px;border-bottom:2px solid #000}
+  header.top h1{font-size:18pt}
+  main{padding:8px 0 0}
+  .wrap{max-width:none;padding:0}
+  section.card{border:1px solid #999;border-radius:0;padding:10px 12px;margin:0 0 10px;break-inside:avoid;page-break-inside:avoid}
+  section.bld{break-before:page;page-break-before:always}
+  section.bld:first-of-type{break-before:auto}
+  .noprint,button,details.ref,.notice,.hint,.status,.toast,footer{display:none !important}
+  input,select,textarea{display:none !important}
+  .pv{display:block;border:1px solid #bbb;padding:4px 6px;min-height:1.6em;background:#fff}
+  .pv.empty{color:#b00;font-style:italic}
+  .printonly{display:block}
+  .photo img{max-height:4.6in}
+  .photo-wrap{background:#fff;padding:0}
+  .row{grid-template-columns:40px 180px 1fr;padding-top:6px;gap:8px}
+  .rows{gap:6px}
+  .cmp-imgs img{height:2.2in}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>Design Detective</h1>
+    <p>Elements and Principles of Design in Architecture · CEA · 10 points</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="card" id="intro">
+    <h2>Your name</h2>
+    <div class="grid2">
+      <div><label class="f" for="first">First name</label><input type="text" id="first" autocomplete="off"><div class="pv" data-for="first"></div></div>
+      <div><label class="f" for="last">Last name</label><input type="text" id="last" autocomplete="off"><div class="pv" data-for="last"></div></div>
+    </div>
+    <div style="margin-top:12px;max-width:240px"><label class="f" for="period">Class period</label><input type="text" id="period" autocomplete="off"><div class="pv" data-for="period"></div></div>
+    <p class="printonly small" id="printStamp"></p>
+
+    <div class="noprint">
+      <h2 style="margin-top:20px">How this works</h2>
+      <p>Architects use the same design vocabulary as artists. Your job is to find that vocabulary in real buildings, and to show <strong>exactly where</strong> you see it by placing markers on the photos.</p>
+      <ol class="steps">
+        <li><strong>Part 1:</strong> For each of 6 buildings, click the photo to drop 3 numbered markers. For each marker, choose the element or principle it shows and write one sentence about <em>what at that spot</em> shows it.</li>
+        <li><strong>Part 2:</strong> Compare two buildings and explain how balance changes the way they feel.</li>
+        <li><strong>Part 3:</strong> Find the focal point of one building and explain what pulls your eye there.</li>
+        <li><strong>Finish:</strong> Click <em>Save as PDF</em> at the bottom and upload the PDF to Canvas.</li>
+      </ol>
+      <div class="notice"><strong>Your work saves automatically in this browser</strong>, so you can close the tab and come back on the same laptop. Typing must be your own: pasting into the answer boxes is turned off.</div>
+
+      <details class="ref" id="ref">
+        <summary>Vocabulary reference (open this whenever you need it)</summary>
+        <dl class="terms">
+          <div class="termhead">Elements: the building blocks you can see</div>
+          <dt>Line</dt><dd>A visible edge or path: rooflines, column edges, window frames, bands of stone. Lines can be straight, curved, horizontal, vertical, or diagonal.</dd>
+          <dt>Shape</dt><dd>A flat, 2D outline: a rectangle of a window, a triangle of a roof gable, an arch.</dd>
+          <dt>Form</dt><dd>A 3D mass with volume: a dome, a cylinder, a box, a spiral.</dd>
+          <dt>Color</dt><dd>The hues of the materials and paint, and how light or dark they are.</dd>
+          <dt>Texture</dt><dd>How a surface looks like it would feel: rough stone, smooth glass, ribbed tile.</dd>
+          <dt>Space</dt><dd>The empty areas in and around a building: open terraces, gaps between columns, courtyards, overhangs.</dd>
+          <div class="termhead">Principles: how the elements are arranged</div>
+          <dt>Balance: symmetrical</dt><dd>One half mirrors the other across a center line. Usually feels formal and stable.</dd>
+          <dt>Balance: asymmetrical</dt><dd>The two sides are different but still feel balanced in visual weight. Usually feels relaxed or dynamic.</dd>
+          <dt>Rhythm / repetition</dt><dd>An element repeats in a regular pattern, like columns, windows, or arches, that leads your eye along.</dd>
+          <dt>Emphasis</dt><dd>One part stands out and grabs your attention first: the focal point.</dd>
+          <dt>Proportion / scale</dt><dd>How big parts are compared to each other and to a person.</dd>
+          <dt>Contrast</dt><dd>Strong differences placed together: light vs. dark, rough vs. smooth, curved vs. straight.</dd>
+          <dt>Unity</dt><dd>Everything looks like it belongs together because materials, shapes, or colors are repeated.</dd>
+        </dl>
+      </details>
+    </div>
+  </section>
+
+  <div id="part1"></div>
+
+  <section class="card" id="part2">
+    <h2>Part 2: Compare balance</h2>
+    <p class="muted">Look at these two buildings side by side.</p>
+    <div class="cmp-imgs">
+      <figure><img id="cmpA" alt="Parthenon"><figcaption>A: Parthenon</figcaption></figure>
+      <figure><img id="cmpB" alt="Fallingwater"><figcaption>B: Fallingwater</figcaption></figure>
+    </div>
+    <div class="q">
+      <label class="f" for="p2sym">Which building uses <em>symmetrical</em> balance?</label>
+      <select id="p2sym"><option value="">Choose…</option><option>A: Parthenon</option><option>B: Fallingwater</option></select>
+      <div class="pv" data-for="p2sym"></div>
+    </div>
+    <div class="q">
+      <label class="f" for="p2feel">Which building feels more <em>formal</em>, and which feels more <em>relaxed</em>? Explain in 2–3 sentences how balance creates that feeling.</label>
+      <textarea id="p2feel"></textarea><div class="pv" data-for="p2feel"></div>
+    </div>
+    <div class="grid2">
+      <div class="q"><label class="f" for="p2a">One specific feature of the <strong>Parthenon</strong> that creates its feeling (what it is and where it is):</label><textarea id="p2a"></textarea><div class="pv" data-for="p2a"></div></div>
+      <div class="q"><label class="f" for="p2b">One specific feature of <strong>Fallingwater</strong> that creates its feeling (what it is and where it is):</label><textarea id="p2b"></textarea><div class="pv" data-for="p2b"></div></div>
+    </div>
+  </section>
+
+  <section class="card" id="part3">
+    <h2>Part 3: Find the focal point</h2>
+    <p class="muted">The focal point is the spot your eye goes to first. Click the photo to place the <strong>F</strong> marker on the Taj Mahal's focal point. Then name two design choices that pull your eye there.</p>
+    <p class="hint" id="p3hint">Click the photo to place the F marker.</p>
+    <div class="photo-wrap"><div class="photo" id="p3photo"><img id="p3img" alt="Taj Mahal"></div></div>
+    <div class="credit" id="p3credit"></div>
+    <div class="rows">
+      <div class="row">
+        <div class="badge focal">1</div>
+        <div><select id="p3t1"></select><div class="pv" data-for="p3t1"></div></div>
+        <div class="why"><textarea id="p3s1" placeholder="How does this choice pull your eye to the F marker?"></textarea><div class="pv" data-for="p3s1"></div></div>
+      </div>
+      <div class="row">
+        <div class="badge focal">2</div>
+        <div><select id="p3t2"></select><div class="pv" data-for="p3t2"></div></div>
+        <div class="why"><textarea id="p3s2" placeholder="How does this choice pull your eye to the F marker?"></textarea><div class="pv" data-for="p3s2"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card noprint" id="finish">
+    <h2>Finish and submit</h2>
+    <p>Everything below needs a check mark before you save.</p>
+    <ul class="checklist" id="checklist"></ul>
+    <p style="margin-top:16px"><button class="primary" id="saveBtn" type="button">Save as PDF</button></p>
+    <p class="small muted">In the print window, set <strong>Destination</strong> to <strong>Save as PDF</strong>, then click <strong>Save</strong>. The file name will be filled in as <em>Last_First</em>. Upload that PDF to the Canvas assignment.</p>
+
+    <h3 style="margin-top:22px">How you'll be graded (10 points)</h3>
+    <table class="rub">
+      <tr><th>What earns the points</th><th>Points</th></tr>
+      <tr><td><strong>Part 1:</strong> 1 point per building when all 3 markers are on the right spot, tagged with a correct element or principle, and explained.</td><td class="pts">6</td></tr>
+      <tr><td><strong>Part 2:</strong> Correct building identified, the feeling explained through balance, and a specific feature named for each building.</td><td class="pts">2</td></tr>
+      <tr><td><strong>Part 3:</strong> Focal point marked in the right spot, with two design choices that explain it.</td><td class="pts">2</td></tr>
+    </table>
+    <p style="margin-top:18px"><button class="ghost" id="resetBtn" type="button">Start over (erases everything)</button></p>
+  </section>
+
+</main>
+<footer>Design Detective · Timber Creek High School CEA · Photos from Wikimedia Commons, used under their listed licenses.</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY = "tchs-cea-design-detective-v1";
+var COMMONS = "https://commons.wikimedia.org/wiki/";
+var BUILDINGS = [
+  {id:"parthenon", name:"Parthenon", place:"Athens, Greece", built:"447–432 BC", by:"Ictinus and Callicrates", file:"Parthenon_-_facade_ouest.jpg"},
+  {id:"fallingwater", name:"Fallingwater", place:"Mill Run, Pennsylvania", built:"1935–1939", by:"Frank Lloyd Wright", file:"Fallingwater_-_by_Frank_Lloyd_Wright.jpg"},
+  {id:"guggenheim", name:"Solomon R. Guggenheim Museum", place:"New York City", built:"1959", by:"Frank Lloyd Wright", file:"NYC_-_Guggenheim_Museum.jpg"},
+  {id:"sydney", name:"Sydney Opera House", place:"Sydney, Australia", built:"1973", by:"Jørn Utzon", file:"Sydney_(AU),_Opera_House_--_2019_--_3054.jpg"},
+  {id:"taj", name:"Taj Mahal", place:"Agra, India", built:"1632–1653", by:"Ustad Ahmad Lahori (attributed)", file:"The_symmetrical_front_view_of_Taj_Mahal.jpg"},
+  {id:"pfeiffer", name:"Annie Pfeiffer Chapel, Florida Southern College", place:"Lakeland, Florida", built:"1941", by:"Frank Lloyd Wright", file:"Lakeland_FSC_Pfeiffer_Chapel01.jpg"}
+];
+var ELEMENTS = ["Line","Shape","Form","Color","Texture","Space"];
+var PRINCIPLES = ["Balance: symmetrical","Balance: asymmetrical","Rhythm / repetition","Emphasis","Proportion / scale","Contrast","Unity"];
+
+function imgURL(file){ return COMMONS + "Special:FilePath/" + encodeURIComponent(file) + "?width=1280"; }
+function pageURL(file){ return COMMONS + "File:" + encodeURIComponent(file); }
+function byId(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+/* ---------- state ---------- */
+function blank(){
+  var s = {first:"", last:"", period:"", p1:{}, p2:{p2sym:"",p2feel:"",p2a:"",p2b:""}, p3:{x:null,y:null,p3t1:"",p3s1:"",p3t2:"",p3s2:""}};
+  BUILDINGS.forEach(function(b){ s.p1[b.id] = [0,1,2].map(function(){ return {x:null,y:null,term:"",text:""}; }); });
+  return s;
+}
+var state = blank();
+try{
+  var raw = localStorage.getItem(KEY);
+  if(raw){
+    var saved = JSON.parse(raw), base = blank();
+    // merge so missing keys never break the page
+    ["first","last","period"].forEach(function(k){ if(typeof saved[k]==="string") base[k]=saved[k]; });
+    if(saved.p2) Object.keys(base.p2).forEach(function(k){ if(typeof saved.p2[k]==="string") base.p2[k]=saved.p2[k]; });
+    if(saved.p3) Object.keys(base.p3).forEach(function(k){ if(saved.p3[k]!==undefined) base.p3[k]=saved.p3[k]; });
+    if(saved.p1) BUILDINGS.forEach(function(b){ if(Array.isArray(saved.p1[b.id])) saved.p1[b.id].slice(0,3).forEach(function(m,i){ if(m) base.p1[b.id][i] = {x:m.x==null?null:m.x, y:m.y==null?null:m.y, term:m.term||"", text:m.text||""}; }); });
+    state = base;
+  }
+}catch(e){}
+var saveTimer = null;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }, 250);
+  refreshChecklist();
+}
+
+/* ---------- toast ---------- */
+var toastTimer=null;
+function toast(msg){ var t=byId("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2600); }
+
+/* ---------- helpers ---------- */
+function termOptions(sel, value){
+  var h = '<option value="">Choose a term…</option><optgroup label="Elements">';
+  ELEMENTS.forEach(function(t){ h += '<option'+(t===value?' selected':'')+'>'+esc(t)+'</option>'; });
+  h += '</optgroup><optgroup label="Principles">';
+  PRINCIPLES.forEach(function(t){ h += '<option'+(t===value?' selected':'')+'>'+esc(t)+'</option>'; });
+  sel.innerHTML = h + '</optgroup>';
+}
+function setPV(id, value){
+  var pv = document.querySelector('.pv[data-for="'+id+'"]');
+  if(!pv) return;
+  pv.textContent = value ? value : "(left blank)";
+  pv.classList.toggle("empty", !value);
+}
+function blockPaste(el){
+  el.addEventListener("paste", function(e){ e.preventDefault(); toast("Pasting is turned off. Type your answer in your own words."); });
+  el.addEventListener("drop", function(e){ e.preventDefault(); });
+}
+function attachImg(img, file, wrapErr){
+  img.src = imgURL(file);
+  img.draggable = false;
+  img.addEventListener("error", function(){
+    var d = document.createElement("div"); d.className="imgerr";
+    d.textContent = "This photo didn't load. Raise your hand and let your teacher know.";
+    (wrapErr || img.parentNode).replaceChild(d, img);
+  });
+}
+function creditHTML(file){ return 'Photo: Wikimedia Commons · <a href="'+pageURL(file)+'" target="_blank" rel="noopener">photographer and license</a>'; }
+function pctFromEvent(e, el){
+  var r = el.getBoundingClientRect();
+  var x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
+  return {x: Math.max(0,Math.min(100,Math.round(x*10)/10)), y: Math.max(0,Math.min(100,Math.round(y*10)/10))};
+}
+
+/* ---------- Part 1 ---------- */
+var active = {}; // building id -> marker index being placed
+function nextUnplaced(bid){ var ms=state.p1[bid]; for(var i=0;i<3;i++){ if(ms[i].x==null) return i; } return -1; }
+
+function buildPart1(){
+  var host = byId("part1");
+  BUILDINGS.forEach(function(b, bi){
+    var sec = document.createElement("section");
+    sec.className = "card bld"; sec.id = "b-"+b.id;
+    var rows = "";
+    for(var i=0;i<3;i++){
+      rows += '<div class="row">'+
+        '<div class="badge">'+(i+1)+'</div>'+
+        '<div><select id="t-'+b.id+'-'+i+'"></select><div class="pv" data-for="t-'+b.id+'-'+i+'"></div>'+
+          '<div class="status" id="st-'+b.id+'-'+i+'"></div>'+
+          '<div class="noprint" style="margin-top:4px"><button type="button" data-move="'+b.id+'-'+i+'">Move marker '+(i+1)+'</button></div></div>'+
+        '<div class="why"><textarea id="w-'+b.id+'-'+i+'" placeholder="What at marker '+(i+1)+' shows this? Be specific about what you see there."></textarea><div class="pv" data-for="w-'+b.id+'-'+i+'"></div></div>'+
+      '</div>';
+    }
+    sec.innerHTML =
+      (bi===0 ? '<h2>Part 1: Mark up the buildings</h2><p class="muted noprint">For each building: click the photo to place markers 1, 2 and 3. Then choose a term and explain each one. Use <strong>three different terms</strong> on each building.</p>' : '')+
+      '<div class="bld-head"><h3><span class="num">'+(bi+1)+'</span>'+esc(b.name)+'</h3><span class="muted small">'+esc(b.place)+' · '+esc(b.built)+' · '+esc(b.by)+'</span></div>'+
+      '<p class="hint" id="h-'+b.id+'"></p>'+
+      '<div class="photo-wrap"><div class="photo" id="ph-'+b.id+'"><img alt="'+esc(b.name)+'"></div></div>'+
+      '<div class="credit">'+creditHTML(b.file)+'</div>'+
+      '<div class="rows">'+rows+'</div>';
+    host.appendChild(sec);
+
+    var photo = byId("ph-"+b.id);
+    attachImg(photo.querySelector("img"), b.file);
+    active[b.id] = nextUnplaced(b.id);
+    photo.addEventListener("click", function(e){
+      if(!photo.querySelector("img")) return;
+      var idx = active[b.id];
+      if(idx<0){ toast("All 3 markers are placed. Use a Move button to move one."); return; }
+      var p = pctFromEvent(e, photo);
+      state.p1[b.id][idx].x = p.x; state.p1[b.id][idx].y = p.y;
+      active[b.id] = nextUnplaced(b.id);
+      drawP1(b.id); save();
+    });
+    for(var j=0;j<3;j++){ (function(i){
+      var sel = byId("t-"+b.id+"-"+i), ta = byId("w-"+b.id+"-"+i);
+      termOptions(sel, state.p1[b.id][i].term);
+      ta.value = state.p1[b.id][i].text;
+      sel.addEventListener("change", function(){ state.p1[b.id][i].term = sel.value; setPV(sel.id, sel.value); save(); });
+      ta.addEventListener("input", function(){ state.p1[b.id][i].text = ta.value; setPV(ta.id, ta.value.trim()); save(); });
+      blockPaste(ta);
+      setPV(sel.id, sel.value); setPV(ta.id, ta.value.trim());
+    })(j); }
+    drawP1(b.id);
+  });
+  document.addEventListener("click", function(e){
+    var t = e.target.closest && e.target.closest("[data-move]");
+    if(!t) return;
+    var parts = t.getAttribute("data-move").split("-"); var bid = parts[0], i = +parts[1];
+    active[bid] = i; drawP1(bid);
+    byId("ph-"+bid).scrollIntoView({behavior:"smooth", block:"center"});
+  });
+}
+function drawP1(bid){
+  var photo = byId("ph-"+bid);
+  photo.querySelectorAll(".mk").forEach(function(m){ m.remove(); });
+  var ms = state.p1[bid];
+  ms.forEach(function(m,i){
+    if(m.x==null) { setStatus(bid,i,false); return; }
+    var d = document.createElement("div"); d.className = "mk" + (active[bid]===i ? " active" : "");
+    d.style.left = m.x+"%"; d.style.top = m.y+"%"; d.textContent = i+1;
+    photo.appendChild(d); setStatus(bid,i,true);
+  });
+  var h = byId("h-"+bid), a = active[bid];
+  h.textContent = a>=0 ? (ms[a].x==null ? "Click the photo to place marker "+(a+1)+"." : "Click the photo to move marker "+(a+1)+".") : "All 3 markers placed. Use a Move button if you want to change one.";
+  photo.classList.toggle("noclick", a<0);
+}
+function setStatus(bid,i,placed){
+  var s = byId("st-"+bid+"-"+i);
+  s.className = "status " + (placed ? "placed" : "unplaced");
+  s.textContent = placed ? "Marker placed" : "Not placed yet";
+}
+
+/* ---------- Part 2 ---------- */
+function buildPart2(){
+  attachImg(byId("cmpA"), BUILDINGS[0].file);
+  attachImg(byId("cmpB"), BUILDINGS[1].file);
+  ["p2sym","p2feel","p2a","p2b"].forEach(function(id){
+    var el = byId(id); el.value = state.p2[id];
+    el.addEventListener(el.tagName==="SELECT"?"change":"input", function(){ state.p2[id] = el.value; setPV(id, el.value.trim()); save(); });
+    if(el.tagName==="TEXTAREA") blockPaste(el);
+    setPV(id, el.value.trim());
+  });
+}
+
+/* ---------- Part 3 ---------- */
+var tajFile = BUILDINGS[4].file;
+function buildPart3(){
+  var photo = byId("p3photo");
+  attachImg(byId("p3img"), tajFile);
+  byId("p3credit").innerHTML = creditHTML(tajFile);
+  photo.addEventListener("click", function(e){
+    if(!photo.querySelector("img")) return;
+    var p = pctFromEvent(e, photo); state.p3.x = p.x; state.p3.y = p.y; drawP3(); save();
+  });
+  ["p3t1","p3t2"].forEach(function(id){ termOptions(byId(id), state.p3[id]); });
+  ["p3t1","p3s1","p3t2","p3s2"].forEach(function(id){
+    var el = byId(id); if(el.tagName==="TEXTAREA") el.value = state.p3[id];
+    el.addEventListener(el.tagName==="SELECT"?"change":"input", function(){ state.p3[id] = el.value; setPV(id, el.value.trim()); save(); });
+    if(el.tagName==="TEXTAREA") blockPaste(el);
+    setPV(id, el.value.trim());
+  });
+  drawP3();
+}
+function drawP3(){
+  var photo = byId("p3photo");
+  photo.querySelectorAll(".mk").forEach(function(m){ m.remove(); });
+  if(state.p3.x!=null){
+    var d=document.createElement("div"); d.className="mk focal"; d.textContent="F";
+    d.style.left=state.p3.x+"%"; d.style.top=state.p3.y+"%"; photo.appendChild(d);
+    byId("p3hint").textContent = "F marker placed. Click the photo again to move it.";
+  } else byId("p3hint").textContent = "Click the photo to place the F marker.";
+}
+
+/* ---------- name fields ---------- */
+function buildName(){
+  ["first","last","period"].forEach(function(id){
+    var el = byId(id); el.value = state[id];
+    el.addEventListener("input", function(){ state[id] = el.value; setPV(id, el.value.trim()); save(); });
+    setPV(id, el.value.trim());
+  });
+}
+
+/* ---------- checklist ---------- */
+function words(s){ return (s||"").trim().split(/\s+/).filter(Boolean).length; }
+function checks(){
+  var list = [];
+  list.push({ok: state.first.trim() && state.last.trim(), label:"First and last name entered"});
+  BUILDINGS.forEach(function(b,bi){
+    var ms = state.p1[b.id];
+    var placed = ms.every(function(m){return m.x!=null;});
+    var tagged = ms.every(function(m){return m.term;});
+    var explained = ms.every(function(m){return words(m.text)>=5;});
+    var terms = ms.map(function(m){return m.term;}).filter(Boolean);
+    var distinct = new Set(terms).size === terms.length;
+    var ok = placed && tagged && explained && distinct;
+    var why = [];
+    if(!placed) why.push("place all 3 markers");
+    if(!tagged) why.push("choose a term for each");
+    if(!explained) why.push("write a full sentence for each");
+    if(tagged && !distinct) why.push("use 3 different terms");
+    list.push({ok: ok, label:"Part 1, building "+(bi+1)+": "+b.name + (ok ? "" : " (still need to: "+why.join(", ")+")")});
+  });
+  var p2 = state.p2;
+  list.push({ok: p2.p2sym && words(p2.p2feel)>=15 && words(p2.p2a)>=5 && words(p2.p2b)>=5, label:"Part 2: all four answers complete"});
+  var p3 = state.p3;
+  list.push({ok: p3.x!=null && p3.p3t1 && p3.p3t2 && words(p3.p3s1)>=5 && words(p3.p3s2)>=5, label:"Part 3: F marker placed and both design choices explained"});
+  return list;
+}
+function refreshChecklist(){
+  var ul = byId("checklist"); if(!ul) return;
+  ul.innerHTML = checks().map(function(c){ return '<li class="'+(c.ok?"done":"todo")+'">'+esc(c.label)+'</li>'; }).join("");
+}
+
+/* ---------- save / print ---------- */
+function clean(s){ return (s||"").trim().replace(/[^A-Za-z0-9\-]+/g,""); }
+byId("saveBtn").addEventListener("click", function(){
+  if(!state.first.trim() || !state.last.trim()){ toast("Type your first and last name at the top first."); byId("first").focus(); return; }
+  var open = checks().filter(function(c){return !c.ok;}).length;
+  if(open && !confirm("You still have "+open+" unfinished item"+(open>1?"s":"")+" on the checklist. Save the PDF anyway?")) return;
+  var now = new Date();
+  byId("printStamp").textContent = "Saved " + now.toLocaleDateString() + " at " + now.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"}) + " · Checklist items complete: " + checks().filter(function(c){return c.ok;}).length + " of " + checks().length;
+  var oldTitle = document.title;
+  document.title = clean(state.last) + "_" + clean(state.first);
+  window.print();
+  setTimeout(function(){ document.title = oldTitle; }, 1000);
+});
+byId("resetBtn").addEventListener("click", function(){
+  if(!confirm("This erases all your markers and answers. Are you sure?")) return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  location.reload();
+});
+
+buildName(); buildPart1(); buildPart2(); buildPart3(); refreshChecklist();
+})();
+</script>
+</body>
+</html>
