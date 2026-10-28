@@ -37,6 +37,13 @@ details.ref summary{cursor:pointer;font-weight:700;color:var(--brand)}
 dl.terms{display:grid;grid-template-columns:200px 1fr;gap:6px 14px;margin:10px 0 0}
 dl.terms dt{font-weight:700}
 dl.terms dd{margin:0}
+dl.terms dt button.term{border:none;background:none;padding:0;color:var(--brand);font-weight:700;font-size:1rem;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
+dl.terms dt button.term:hover{background:none;color:var(--brand-2)}
+dl.terms dt button.term::after{content:" ▸";font-size:.8rem}
+dl.terms dt button.term[aria-expanded="true"]::after{content:" ▾"}
+dl.terms dd.ex{grid-column:1/-1;margin:2px 0 10px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px}
+dl.terms dd.ex img{display:block;max-width:100%;max-height:340px;margin:0 auto;border-radius:4px}
+dl.terms dd.ex .excap{margin:8px 0 2px}
 @media (max-width:600px){dl.terms{grid-template-columns:1fr}}
 .termhead{grid-column:1/-1;margin-top:8px;font-weight:800;text-transform:uppercase;font-size:.8rem;letter-spacing:1px;color:var(--muted)}
 .bld-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -140,23 +147,8 @@ footer{color:var(--muted);font-size:.8rem;text-align:center;padding:10px 0 30px}
 
       <details class="ref" id="ref">
         <summary>Vocabulary reference (open this whenever you need it)</summary>
-        <dl class="terms">
-          <div class="termhead">Elements: the building blocks you can see</div>
-          <dt>Line</dt><dd>A visible edge or path: rooflines, column edges, window frames, bands of stone. Lines can be straight, curved, horizontal, vertical, or diagonal.</dd>
-          <dt>Shape</dt><dd>A flat, 2D outline: a rectangle of a window, a triangle of a roof gable, an arch.</dd>
-          <dt>Form</dt><dd>A 3D mass with volume: a dome, a cylinder, a box, a spiral.</dd>
-          <dt>Color</dt><dd>The hues of the materials and paint, and how light or dark they are.</dd>
-          <dt>Texture</dt><dd>How a surface looks like it would feel: rough stone, smooth glass, ribbed tile.</dd>
-          <dt>Space</dt><dd>The empty areas in and around a building: open terraces, gaps between columns, courtyards, overhangs.</dd>
-          <div class="termhead">Principles: how the elements are arranged</div>
-          <dt>Balance: symmetrical</dt><dd>One half mirrors the other across a center line. Usually feels formal and stable.</dd>
-          <dt>Balance: asymmetrical</dt><dd>The two sides are different but still feel balanced in visual weight. Usually feels relaxed or dynamic.</dd>
-          <dt>Rhythm / repetition</dt><dd>An element repeats in a regular pattern, like columns, windows, or arches, that leads your eye along.</dd>
-          <dt>Emphasis</dt><dd>One part stands out and grabs your attention first: the focal point.</dd>
-          <dt>Proportion / scale</dt><dd>How big parts are compared to each other and to a person.</dd>
-          <dt>Contrast</dt><dd>Strong differences placed together: light vs. dark, rough vs. smooth, curved vs. straight.</dd>
-          <dt>Unity</dt><dd>Everything looks like it belongs together because materials, shapes, or colors are repeated.</dd>
-        </dl>
+        <p class="small muted" style="margin:8px 0 0">Click any term to see a real building that shows it. Click again to hide the photo.</p>
+        <dl class="terms" id="terms"></dl>
       </details>
     </div>
   </section>
@@ -309,6 +301,46 @@ function pctFromEvent(e, el){
   var r = el.getBoundingClientRect();
   var x = (e.clientX - r.left) / r.width * 100, y = (e.clientY - r.top) / r.height * 100;
   return {x: Math.max(0,Math.min(100,Math.round(x*10)/10)), y: Math.max(0,Math.min(100,Math.round(y*10)/10))};
+}
+
+/* ---------- vocabulary with click-to-show examples ---------- */
+var TERMS = [
+  {head:"Elements: the building blocks you can see"},
+  {t:"Line", d:"A visible edge or path: rooflines, column edges, window frames, bands of stone. Lines can be straight, curved, horizontal, vertical, or diagonal.", ex:"Robie House, Chicago", look:"The long, low roof edges and stripes of brick run sideways and pull your eye along the length of the house.", file:"Robie_House.jpg"},
+  {t:"Shape", d:"A flat, 2D outline: a rectangle of a window, a triangle of a roof gable, an arch.", ex:"Bank of China Tower, Hong Kong", look:"Diagonal braces divide the glass walls into big triangles.", file:"Bank_of_China_Tower_(Hong_Kong).jpg"},
+  {t:"Form", d:"A 3D mass with volume: a dome, a cylinder, a box, a spiral.", ex:"Habitat 67, Montreal", look:"Each apartment is a concrete box with real depth, stacked like building blocks.", file:"Habitat_67,_Montreal.jpg"},
+  {t:"Color", d:"The hues of the materials and paint, and how light or dark they are.", ex:"Rainbow Row, Charleston, South Carolina", look:"Each house in the row is painted a different color, so color is what you notice first.", file:"Rainbow_Row,_Charleston_SC_2016.07.14_(55).jpg"},
+  {t:"Texture", d:"How a surface looks like it would feel: rough stone, smooth glass, ribbed tile.", ex:"Casa de los Picos, Segovia, Spain", look:"The whole wall is covered in pointed stone knobs. You can almost feel the bumps just by looking.", file:"Casa_de_los_Picos,_Segovia.jpg"},
+  {t:"Space", d:"The empty areas in and around a building: open terraces, gaps between columns, courtyards, overhangs.", ex:"Barcelona Pavilion, Spain", look:"The walls stand apart under a thin roof, so open space flows in, around and through the building.", file:"Pabellón_Mies_van_der_Rohe.jpg"},
+  {head:"Principles: how the elements are arranged"},
+  {t:"Balance: symmetrical", d:"One half mirrors the other across a center line. Usually feels formal and stable.", ex:"U.S. Capitol, Washington, D.C.", look:"The dome sits on the center line, and the wings on the left and right mirror each other.", file:"United_States_Capitol_-_west_front.jpg"},
+  {t:"Balance: asymmetrical", d:"The two sides are different but still feel balanced in visual weight. Usually feels relaxed or dynamic.", ex:"Guggenheim Museum Bilbao, Spain", look:"No two sides match. Curving metal forms of different sizes are arranged so the building still doesn't feel lopsided.", file:"Museo_Guggenheim_--_2021_--_Bilbao,_Euskadi,_España.jpg"},
+  {t:"Rhythm / repetition", d:"An element repeats in a regular pattern, like columns, windows, or arches, that leads your eye along.", ex:"Pont du Gard, France", look:"Rows of arches repeat at a steady beat across all three levels of this Roman aqueduct.", file:"Pont_du_Gard_BLS.jpg"},
+  {t:"Emphasis", d:"One part stands out and grabs your attention first: the focal point.", ex:"Florence Cathedral, Italy", look:"The huge red dome rises above everything around it and grabs your attention first.", file:"Florence_Cathedral_(Duomo).jpg"},
+  {t:"Proportion / scale", d:"How big parts are compared to each other and to a person.", ex:"Abu Simbel, Egypt", look:"Compare the giant seated statues to the doorway between them. The statues are about 66 feet tall.", file:"Abusimbel.jpg"},
+  {t:"Contrast", d:"Strong differences placed together: light vs. dark, rough vs. smooth, curved vs. straight.", ex:"Louvre Pyramid, Paris", look:"A modern glass-and-steel pyramid sits right in front of a centuries-old stone palace.", file:"Louvre_Pyramid_from_Cour_Napoléon,_Paris.jpg"},
+  {t:"Unity", d:"Everything looks like it belongs together because materials, shapes, or colors are repeated.", ex:"Oia, Santorini, Greece", look:"The same white walls and rounded shapes repeat across the whole village, so it reads as one design.", file:"Oia-Santorini-Greece.jpg"}
+];
+function buildTerms(){
+  var dl = byId("terms");
+  TERMS.forEach(function(x, i){
+    if(x.head){ var h=document.createElement("div"); h.className="termhead"; h.textContent=x.head; dl.appendChild(h); return; }
+    var dt=document.createElement("dt"), dd=document.createElement("dd"), ex=document.createElement("dd");
+    var btn=document.createElement("button"); btn.type="button"; btn.className="term"; btn.textContent=x.t;
+    btn.setAttribute("aria-expanded","false"); btn.setAttribute("aria-controls","ex-"+i);
+    dt.appendChild(btn); dd.textContent=x.d;
+    ex.className="ex"; ex.id="ex-"+i; ex.hidden=true;
+    btn.addEventListener("click", function(){
+      if(!ex.dataset.built){
+        ex.innerHTML='<img alt="'+esc(x.ex)+'"><p class="excap"><strong>'+esc(x.ex)+(/\.$/.test(x.ex)?'':'.')+'</strong> '+esc(x.look)+'</p><div class="credit">'+creditHTML(x.file)+'</div>';
+        var img=ex.querySelector("img"); img.src=imgURL(x.file);
+        img.addEventListener("error", function(){ var d=document.createElement("div"); d.className="imgerr"; d.textContent="This photo didn't load, but the description still applies."; img.replaceWith(d); });
+        ex.dataset.built="1";
+      }
+      ex.hidden=!ex.hidden; btn.setAttribute("aria-expanded", ex.hidden?"false":"true");
+    });
+    dl.appendChild(dt); dl.appendChild(dd); dl.appendChild(ex);
+  });
 }
 
 /* ---------- Part 1 ---------- */
@@ -490,7 +522,7 @@ byId("resetBtn").addEventListener("click", function(){
   location.reload();
 });
 
-buildName(); buildPart1(); buildPart2(); buildPart3(); refreshChecklist();
+buildTerms(); buildName(); buildPart1(); buildPart2(); buildPart3(); refreshChecklist();
 })();
 </script>
 </body>
